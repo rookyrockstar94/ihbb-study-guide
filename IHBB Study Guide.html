@@ -43,6 +43,7 @@ strong{font-weight:600}
 
 .shell{display:grid;grid-template-columns:var(--rail) minmax(0,1fr);min-height:100%}
 /* ---------- rail ---------- */
+.rail>*{flex-shrink:0}
 .rail{position:sticky;top:env(safe-area-inset-top,0px);align-self:start;height:100vh;height:100dvh;overflow:auto;
   border-right:1px solid var(--rule);background:var(--paper);padding-block:20px 40px;padding-inline:18px;display:flex;flex-direction:column;gap:16px}
 .brand{display:flex;flex-direction:column;gap:2px;text-decoration:none;color:var(--ink)}
@@ -246,7 +247,7 @@ html.theming,html.theming *,html.theming *::before,html.theming *::after{
 .theme svg{width:15px;height:15px}
 
 /* guide switch + type tags */
-.secs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;border:1px solid var(--rule);border-radius:8px;background:var(--rule);overflow:hidden;box-shadow:var(--shadow-1)}
+.secs{flex:none;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;border:1px solid var(--rule);border-radius:8px;background:var(--rule);overflow:hidden;box-shadow:var(--shadow-1)}
 .secs a{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px 7px;text-align:center;text-decoration:none;color:var(--ink-2);background:var(--sheet);
   font-family:var(--font-display);font-weight:600;font-size:13.5px;letter-spacing:.05em;text-transform:uppercase;line-height:1.1;transition:background .15s,color .15s}
 .secs a svg{width:17px;height:17px;opacity:.8}
@@ -481,6 +482,15 @@ input[type=range].pin{padding:0;border:0;background:none;accent-color:var(--buzz
   .pctl .pbtn .t{display:none}
 }
 @media (max-width:420px){.pctl kbd{display:none}}
+
+/* hand-off to Claude */
+.handoff{border-top:4px solid var(--accent)}
+.hoin{padding:16px 18px 18px;display:flex;flex-direction:column;gap:12px}
+.steps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px;font-size:15.5px;max-width:68ch}
+.steps code{font-family:var(--font-mono);font-size:.85em;background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:0 4px}
+.hprev>summary{cursor:pointer;font-family:var(--font-mono);font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--accent)}
+.hprev textarea{margin-top:8px;width:100%;min-height:260px;resize:vertical;padding:10px 12px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink);font:12.5px/1.5 var(--font-mono)}
+.handoff .mbtn{padding:9px 18px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -1173,12 +1183,117 @@ function missingHTML(){
   let h = `<header class="region-head"><div class="eyebrow"><span>Missing list</span><span>${open.length} open</span><span>${done.length} added</span></div>
     <h1>Missing from the guide</h1>
     <p class="lede">Things to add later. Tap <b>Missing?</b> at the bottom of any page to note one; it remembers what you were reading.</p>
-    <p class="fstat">${notesOnline ? 'Saved online with this page. Ask Claude to “add the things on my missing list” and it can read them.' : 'Saved in this browser only. Open the guide on claude.ai to keep the list online.'}${notesErr ? ' · ' + esc(notesErr) : ''}</p>
+    <p class="fstat">${notesOnline ? 'Saved online with this page. Ask Claude to “add the things on my missing list” and it can read them, or use the prompt below in any Claude chat.' : 'Saved in this browser only. Open the guide on claude.ai to keep the list online.'}${notesErr ? ' · ' + esc(notesErr) : ''}</p>
     <div class="tags"><button type="button" class="mbtn" data-nnew="1">Add a note</button></div></header>`;
+  h += handoffHTML(open);
   h += `<h2 class="sec-h">Open · ${open.length}</h2>` + (open.length ? `<ul class="notes">${open.map(noteLI).join('')}</ul>` : '<p class="pnote">Nothing open. Notes you add appear here.</p>');
   if (done.length) h += `<h2 class="sec-h">Added · ${done.length}</h2><ul class="notes">${done.map(noteLI).join('')}</ul>`;
   return h;
 }
+// ---------- hand the missing list to Claude ----------
+// Builds one self-contained prompt: the open notes, where each was noticed, and how the file stores its data,
+// so a regular Claude chat can edit the attached file with its code tool and hand back a download.
+function whereDesc(id){
+  const l = LOC[id]; if (!l) return '';
+  const path = [strip(SECS[l.r.sec].name), strip(l.r.title)];
+  if (l.p && !l.p.implicit && (!l.u || strip(l.p.title) !== strip(l.u.title))) path.push(strip(l.p.title));
+  if (l.u) path.push(strip(l.u.title));
+  if (l.b) path.push(strip(l.b.name));
+  return path.join(' › ') + ` (id: ${id})`;
+}
+function claudePrompt(list){
+  const items = list.map((n, i) => {
+    const w = n.where ? (whereDesc(n.where) || n.whereTitle || n.where) : '';
+    return `${i + 1}. ${n.kind ? `[${n.kind}] ` : ''}${n.text.replace(/\s*\n\s*/g, ' ').trim()}${w ? `\n   Noticed while reading: ${w}` : ''}`;
+  }).join('\n');
+  const regs = SEC_ORDER.map(k => `- ${k}: ` + SECS[k].regs.map(R => `${R.id} (${strip(R.title)})`).join('; ')).join('\n');
+  const tags = k => (k === 'people' ? PP.roles : RAW[k].tags).map(t => t.id).join(', ');
+  return `I'm attaching my IHBB study guide, a single HTML file called "IHBB Study Guide.html". Please add the things on my missing list below to it, then give me the complete updated file to download.
+
+## My missing list (${list.length} ${list.length === 1 ? 'item' : 'items'})
+${items}
+
+For each item: if it is something new, add a new entry; if it is a detail or a fix, change the existing entry it refers to. "Noticed while reading" says where I was when I noted it, which usually tells you the right guide and region. If an item is already covered, tell me where instead of adding a duplicate.
+
+## How to edit the file
+- The file is about 2 MB, so don't read it or retype it in the chat. Use your code tool (Python) to open the attached file, change it, and save a new file I can download.
+- All the content lives in one JSON block: <script id="data" type="application/json">…<\/script>. Parse it with json.loads, change the data, then write it back with json.dumps(data, ensure_ascii=False) and replace every "</" with "<\\/" so the script tag can't end early. Leave everything outside that block (the CSS and JavaScript) exactly as it is.
+- Top level: wars, revs (revolts), people, evs (events), ins (institutions). Each has regions[] → periods[] → units[] (a unit is one entry). Region: {id, title, dates, intro[], periods[]}. Period: {id, title, dates, notes[], units[]}; some wars periods have "implicit": true and just wrap one entry.
+- Before writing a new entry, print one or two existing entries from the same guide and region and copy their exact shape and style. Shapes:
+  - wars unit: {id, title, dates, intro: [], sides: [[label, html]], fields: [[label, html]] (labels used: Overview, Causes, Course, Outcome, Why it matters, Hooks), notes: [], battles: [], battle_label: "Key battles", people: [person ids]}
+  - battle (inside a war's battles[]): {id: "<war id>-<slug>", name, meta: "date", lead: html, parts: [["Why" | "What" | "Hooks", html]]}
+  - revs unit: {id: "rv-<slug>", title, dates, types: [[tag, note]] (first = main type), against: html, intro, sides, fields (What it was, Why it happened, Key figures, Outcome, Hooks), notes, battles, battle_label, wars: [[id, title]], people: [ids]}
+  - people unit: {id: "pp-<slug>", title, name, dates, roles: [role ids] (first = main), affs: [affiliation names], aka: [other names], intro: [], sides: [], fields: [["Who", …], ["Rise", …], ["Key deeds", …], ["End", …], ["Why it matters", …], ["Hooks", …]], notes: [], battles: [], related: [person ids], appears: [[id, title, "wars" | "revs" | "evs" | "ins"]]}
+  - evs unit: {id: "ev-<slug>", title, dates, types, against, where, intro, sides, fields (What happened, Key figures, Outcome, Hooks), notes, battles, wars, revl: [[id, title]] (revolts), people}
+  - ins unit: {id: "in-<slug>", …same keys as evs; fields usually What it was, Key figures, Hooks}
+- Allowed type and role ids (don't invent new ones):
+  - revs: ${tags('revs')}
+  - evs: ${tags('evs')}
+  - ins: ${tags('ins')}
+  - people roles: ${tags('people')}
+- Regions in each guide (put entries in the right one, in date order within their period):
+${regs}
+- IDs are lowercase hyphenated slugs and must be unique across the whole file.
+- Links inside html text: a person is <a class="plink" href="#pp-id">Name</a>; any other entry is <a class="xref" href="#id">Title</a>. Only link to ids that exist. Use <strong> for key names and terms.
+- Keep cross-links two-way: when a new person took part in a war, revolt, event or institution, add their id to that entry's people list and add it to the person's appears list (and the reverse when adding a war or event that existing people took part in).
+- Match the house style: short, factual, written for quiz study. "Hooks" are the distinctive clues that come up in IHBB questions. Check facts carefully and don't invent details.
+
+## When you're done
+- Check in code that the JSON parses, every new id is unique, and every href="#…" in the data points to an id that exists.
+- Give me the updated file to download, named "IHBB Study Guide.html", and a short list of what you added or changed and where.`;
+}
+function handoffHTML(open){
+  if (!open.length) return '';
+  return `<section class="card handoff" aria-labelledby="hoh"><div class="hoin">
+    <h2 id="hoh" class="sec-h" style="margin:0">Hand the list to Claude</h2>
+    <ol class="steps"><li><b>Copy the prompt</b> below. It has your ${open.length} open ${open.length === 1 ? 'note' : 'notes'}, where you were reading for each, and instructions for editing this file.</li>
+      <li><b>Start a new Claude chat</b> and attach this file, <code>IHBB Study Guide.html</code>.</li>
+      <li><b>Paste and send.</b> Claude adds the entries and gives you an updated file to download. Open it, check the new entries, then tap <b>Mark all as added</b> here.</li></ol>
+    <div class="vacts"><button type="button" class="mbtn" data-hcopy="1">Copy prompt</button><button type="button" class="lbtn" data-hdl="1">Download as .txt</button><button type="button" class="lbtn" data-hdone="1">Mark all as added</button></div>
+    <p class="mstat" id="hstat" aria-live="polite"></p>
+    <details class="hprev"><summary>Preview the prompt</summary><textarea id="hprompt" readonly aria-label="Prompt for Claude">${esc(claudePrompt(open))}</textarea></details>
+  </div></section>`;
+}
+async function copyText(t){
+  try { await navigator.clipboard.writeText(t); return true; } catch(e){}
+  // older browsers and sandboxed frames: copy from a selected textarea
+  const ta = document.createElement('textarea'); ta.value = t; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+  document.body.appendChild(ta); ta.select();
+  let ok = false; try { ok = document.execCommand('copy'); } catch(e){}
+  ta.remove(); return ok;
+}
+document.addEventListener('click', async e => {
+  const open = () => NOTES.filter(n => !n.done);
+  const st = () => document.getElementById('hstat');
+  if (e.target.closest('[data-hcopy]')){
+    const ok = await copyText(claudePrompt(open()));
+    if (ok){ st().textContent = 'Copied. Now open a new Claude chat, attach the guide file and paste.'; st().classList.remove('err'); }
+    else {
+      st().textContent = "Your browser blocked copying. The prompt is selected below: press Ctrl+C (⌘C on a Mac)."; st().classList.add('err');
+      const d = document.querySelector('.hprev'); if (d) d.open = true;
+      const ta = document.getElementById('hprompt'); if (ta){ ta.focus(); ta.select(); }
+    }
+    return;
+  }
+  if (e.target.closest('[data-hdl]')){
+    try {
+      const url = URL.createObjectURL(new Blob([claudePrompt(open())], {type: 'text/plain;charset=utf-8'}));
+      const a = document.createElement('a'); a.href = url; a.download = 'IHBB missing list for Claude.txt';
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000);
+      st().textContent = 'Downloaded. Attach the .txt and the guide file to a new Claude chat.'; st().classList.remove('err');
+    } catch(err){ st().textContent = "Couldn't download here. Use Copy prompt instead."; st().classList.add('err'); }
+    return;
+  }
+  const md = e.target.closest('[data-hdone]');
+  if (md){
+    if (md.dataset.armed !== '1'){ md.dataset.armed = '1'; md.textContent = `Tap again to mark ${open().length} as added`; md.classList.add('warn');
+      setTimeout(() => { if (md.isConnected){ md.dataset.armed = ''; md.textContent = 'Mark all as added'; md.classList.remove('warn'); } }, 3000); return; }
+    try {
+      if (notesCol){ for (const n of open()) await notesCol.doc(n.id).update({done: true}); }
+      else { open().forEach(n => n.done = true); saveLocal(); notesChanged(); }
+    } catch(err){ notesErr = "Couldn't update: " + ((err && err.message) || ''); notesChanged(); }
+  }
+});
 const delArm = {};
 document.addEventListener('click', async e => {
   const nn = e.target.closest('[data-nnew]'); if (nn){ openNotes(); return; }
