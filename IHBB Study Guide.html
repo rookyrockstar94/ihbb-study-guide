@@ -433,6 +433,10 @@ input[type=range].pin{padding:0;border:0;background:none;accent-color:var(--buzz
 .ghits a b{font-weight:600;color:var(--accent)}
 .ghits a small{font-family:var(--font-mono);font-size:10.5px;color:var(--ink-2);text-transform:uppercase;letter-spacing:.04em}
 .ghits .none{font-size:14px;color:var(--ink-2);margin:0}
+.ghits a{padding:9px 12px;row-gap:3px}
+.ghits a .gw{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-2)}
+.ghits a small{flex-basis:100%}
+.ghits a .gd{flex-basis:100%;font-size:15px;line-height:1.5;color:var(--ink);margin-top:2px}
 .pctl{display:flex;gap:8px;align-items:stretch;position:sticky;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:5}
 .pbtn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);border-radius:10px;padding:12px 16px;cursor:pointer;
   font-family:var(--font-display);font-weight:600;font-size:17px;letter-spacing:.05em;text-transform:uppercase;line-height:1;box-shadow:var(--shadow-1);transition:transform .08s,background .15s,border-color .15s}
@@ -1884,10 +1888,34 @@ function guideHits(a){
   }
   return {term: plain || req, list: []};
 }
+// One or two sentences saying what a guide entry is, taken from the entry itself.
+const BRIEF_FIELDS = ['Who', 'What it was', 'What happened', 'Overview', 'What', 'Course and outcome', 'Course', 'Outcome', 'Why it matters'];
+function briefOf(id){
+  const l = LOC[id]; if (!l) return {text: '', when: ''};
+  let html = '', when = '';
+  if (l.b){ html = l.b.lead || (l.b.parts[0] || [])[1] || ''; when = strip(l.b.meta || ''); }
+  else if (l.u){
+    const u = l.u, f = BRIEF_FIELDS.map(k => u.fields.find(x => x[0] === k)).find(Boolean);
+    html = (f && f[1]) || u.intro[0] || (u.fields[0] || [])[1] || (u.sides[0] ? u.sides[0][0] + ': ' + u.sides[0][1] : '') || u.notes[0] || '';
+    when = u.dates || '';
+    // entries that are just a list of battles: say which battles they cover
+    if (!html && u.battles.length){
+      const names = u.battles.map(b => strip(b.name));
+      html = esc((u.battles.length === 1 ? 'Covers ' : `Covers ${u.battles.length} battles and campaigns: `) + (names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0]) + '.');
+    }
+  }
+  else if (l.p){ html = l.p.notes[0] || ''; when = l.p.dates || ''; }
+  else { html = l.r.intro[0] || ''; when = l.r.dates || ''; }
+  const t = strip(html).replace(/\s+/g, ' ').trim();
+  const ss = t.split(SPLIT);
+  let out = ss[0] || '';
+  if (out.length < 70 && ss[1]) out += ' ' + ss[1];
+  return {text: out.length > 230 ? short(out, 230) : out, when};
+}
 function hitsHTML(a){
   const {term, list} = guideHits(a);
   if (!list.length) return `<div class="ghits"><span class="lbl">In your guide</span><p class="none">Nothing in the guide matches “${esc(term)}”. <button type="button" class="lbtn" data-pmiss="${esc(term)}">Add it to the missing list</button></p></div>`;
-  return `<div class="ghits"><span class="lbl">In your guide</span>${list.map(it => `<a href="#${it.id}" data-go="${it.id}"><span class="kind">${KIND[it.kind]}</span><b>${esc(it.title)}</b>${it.crumbs.length ? `<small>${esc(it.crumbs.join(' › '))}</small>` : ''}</a>`).join('')}</div>`;
+  return `<div class="ghits"><span class="lbl">In your guide</span>${list.map(it => { const br = briefOf(it.id); return `<a href="#${it.id}" data-go="${it.id}"><span class="kind">${KIND[it.kind]}</span><b>${esc(it.title)}</b>${br.when ? `<span class="gw">${esc(br.when)}</span>` : ''}${it.crumbs.length ? `<small>${esc(it.crumbs.join(' › '))}</small>` : ''}${br.text ? `<span class="gd">${esc(br.text)}</span>` : ''}</a>`; }).join('')}</div>`;
 }
 const diffName = d => (QB_DIFFS.find(x => x[0] === d) || [0, ''])[1];
 function srcLine(t){
