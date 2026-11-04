@@ -125,7 +125,7 @@ h1{font-family:var(--font-display);font-weight:700;font-size:clamp(38px,6vw,62px
 .war-h h3{font-family:var(--font-display);font-weight:700;font-size:clamp(25px,3.2vw,31px);line-height:1.05;letter-spacing:.015em;text-transform:uppercase;margin:0;text-wrap:balance}
 .war-h .dates{border:1px solid var(--rule);border-radius:4px;padding:2px 8px;background:var(--paper)}
 .war p{margin:0;max-width:68ch}
-dl.f{margin:0;display:grid;grid-template-columns:118px minmax(0,1fr);gap:10px 18px}
+dl.f{margin:0;display:grid;grid-template-columns:136px minmax(0,1fr);gap:10px 18px}
 dl.f dt{font-family:var(--font-display);font-weight:600;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);padding-top:3px}
 dl.f dd{margin:0;min-width:0}
 dl.sides{padding:12px 14px;background:var(--paper);border-radius:6px;font-size:15.5px;line-height:1.5}
@@ -199,10 +199,10 @@ a.plink:hover{color:var(--accent)}
 .mfab:hover{border-color:var(--accent);color:var(--accent)}
 .mfab b{font-family:var(--font-mono);font-weight:500;font-size:11px;background:var(--mark);color:var(--sheet);border-radius:999px;padding:1px 7px}
 .mfab b:empty{display:none}
-@media (min-width:901px){.mfab{left:calc(var(--rail) + 18px)}}
+@media (min-width:901px){.mfab,.mfab:hover{left:18px;width:calc(var(--rail) - 37px);justify-content:center;box-shadow:var(--shadow-1),0 0 0 17px var(--paper)}.rail{padding-bottom:84px}}
 .mpanel{position:fixed;left:18px;bottom:calc(70px + env(safe-area-inset-bottom,0px));z-index:45;width:min(420px,calc(100vw - 36px));background:var(--sheet);
   border:1px solid var(--ink-2);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 14px 40px rgba(0,0,0,.25)}
-@media (min-width:901px){.mpanel{left:calc(var(--rail) + 18px)}}
+@media (min-width:901px){.mpanel{left:18px}}
 .mpanel h2{margin:0;font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:.03em;text-transform:uppercase}
 .mpanel textarea{width:100%;min-height:96px;resize:vertical;padding:9px 11px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);font:16px/1.45 var(--font-body)}
 .mkinds{display:flex;flex-wrap:wrap;gap:6px}
@@ -491,6 +491,45 @@ input[type=range].pin{padding:0;border:0;background:none;accent-color:var(--buzz
 .hprev>summary{cursor:pointer;font-family:var(--font-mono);font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--accent)}
 .hprev textarea{margin-top:8px;width:100%;min-height:260px;resize:vertical;padding:10px 12px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink);font:12.5px/1.5 var(--font-mono)}
 .handoff .mbtn{padding:9px 18px}
+
+/* ---------- round 2 ---------- */
+main{background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:36px 36px;background-position:-1px -1px}
+:root{--grid:rgba(37,86,131,.045)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--grid:rgba(141,181,221,.035)}}
+:root[data-theme="dark"]{--grid:rgba(141,181,221,.035)}
+#view.enter{animation:enter .32s cubic-bezier(.2,.7,.3,1) both}
+@keyframes enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.war.g-wars{--gh:8}.war.g-revs{--gh:32}.war.g-people{--gh:212}.war.g-evs{--gh:275}.war.g-ins{--gh:168}
+.war[class*="g-"]{border-top:3px solid hsl(var(--gh) 50% var(--t-bar))}
+.war.big{border:2px solid var(--ink);border-top:4px solid hsl(var(--gh) 50% var(--t-bar))}
+dl.f dt.hk{color:var(--accent)}
+dl.f dt.hk::before{content:"\2605\00a0";font-size:.85em}
+dl.f dd.hk{background:var(--hook);border-radius:7px;padding:8px 12px;margin-block:-4px}
+.btoggle .sw{color:currentColor}
+.btoggle{transition:background .15s,color .15s}
+.toc a{position:relative;transition:background .12s,color .12s}
+.toc a.cur{color:var(--accent);font-weight:600;background:var(--accent-soft)}
+.toc a.cur::before{content:"";position:absolute;left:-11px;top:4px;bottom:4px;width:3px;border-radius:2px;background:var(--accent)}
+.regions>li>a{transition:background .12s}
+.rail{scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+.rcard .tally,.tcard .tally{padding-top:4px}
+.region-head h1,.hero h1{letter-spacing:.01em}
+.serp li{padding:16px 18px;background:var(--sheet);border:1px solid var(--rule);border-radius:10px;box-shadow:var(--shadow-1)}
+.serp{gap:12px}
+.region-head .pchips{margin-top:2px}
+.pchip .c{font-family:var(--font-mono);font-size:11px;opacity:.7;margin-left:2px}
+details.battle>summary{transition:background .12s}
+details.battle[open]>summary{background:var(--rule-2);border-radius:5px 5px 0 0}
+.chip{transition:border-color .12s,color .12s,background .12s}
+.chip:hover{background:var(--mark-soft)}
+.mfab{transition:border-color .15s,color .15s,box-shadow .2s}
+.mfab:hover{box-shadow:var(--shadow-2)}
+@media (max-width:900px){
+  .mfab .ml{display:none}
+  .mfab{padding:0;width:46px;height:46px;justify-content:center;gap:0}
+  .mfab b{position:absolute;top:-4px;right:-4px}
+  .serp li{padding:14px}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -519,7 +558,7 @@ input[type=range].pin{padding:0;border:0;background:none;accent-color:var(--buzz
   </nav>
   <main id="main"><div class="col" id="view"></div></main>
 </div>
-<button class="mfab" id="mfab" aria-haspopup="dialog" aria-controls="mpanel" title="Note something the guide is missing"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Missing?<b id="mcount"></b></button>
+<button class="mfab" id="mfab" aria-haspopup="dialog" aria-controls="mpanel" title="Note something the guide is missing"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="ml">Missing?</span><b id="mcount"></b></button>
 <div class="mpanel" id="mpanel" role="dialog" aria-modal="false" aria-labelledby="mph" hidden>
   <h2 id="mph">Something missing?</h2>
   <textarea id="mtext" placeholder="e.g. Add the Battle of Hydaspes · Ziaul Haq isn't in People · Kronstadt death toll?" aria-label="What's missing"></textarea>
@@ -640,7 +679,7 @@ D.regions.forEach(R => {
 // ---------- rendering ----------
 function fields(rows, cls){
   if (!rows.length) return '';
-  return `<dl class="f ${cls||''}">` + rows.map(r => `<dt>${esc(r[0])}</dt><dd>${r[1]}</dd>`).join('') + '</dl>';
+  return `<dl class="f ${cls||''}">` + rows.map(r => r[0] === 'Hooks' ? `<dt class="hk">${esc(r[0])}</dt><dd class="hk">${r[1]}</dd>` : `<dt>${esc(r[0])}</dt><dd>${r[1]}</dd>`).join('') + '</dl>';
 }
 function battleHTML(b){
   const parts = b.parts.map(p => `<div class="part ${p[0]==='Hooks'?'hooks':''}"><b>${esc(p[0])}</b><div>${p[1]}</div></div>`).join('');
@@ -656,7 +695,7 @@ const GUIDE = {wars: 'Wars', revs: 'Revolts', people: 'People', evs: 'Events', i
 function warHTML(u, big){
   const n = u.battles.length;
   const tags = u.types ? u.types.map(x => x[0]) : u.roles;
-  let h = `<article class="war${big?' big':''}" id="${u.id}"${tags?` data-tags="${tags.join(' ')}"`:''}>
+  let h = `<article class="war g-${u.sec}${big?' big':''}" id="${u.id}"${tags?` data-tags="${tags.join(' ')}"`:''}>
     <header class="war-h"><h3>${u.title}</h3>${u.dates?`<span class="dates">${esc(u.dates)}</span>`:''}</header>`;
   if (u.types) h += `<div class="tags" aria-label="Type">${u.types.map(([t, nt], i) => tagLink(u.sec, t, nt, i === 0)).join('')}</div>`;
   if (u.roles) h += `<div class="tags" aria-label="Role">${u.roles.map((t, i) => roleLink(t, i === 0)).join('')}${u.affs.map(affLink).join('')}</div>`;
@@ -959,8 +998,8 @@ function show(id){
   }
   if (id && id.startsWith('search=')){
     const v = id.slice(7);
-    if (v !== lastPageQ){ pageShown = 40; lastPageQ = v; }
-    currentRegion = null; renderRail(); $('#where').textContent = '· Search';
+    if (v !== lastPageQ){ pageShown = 40; lastPageQ = v; searchKind = ''; }
+    hub = true; currentRegion = null; renderRail(); $('#where').textContent = '· Search';
     if (q.value.trim() !== v.trim()) q.value = v;
     res.hidden = true; $('#hint').hidden = true;
     $('#view').innerHTML = searchHTML(v, pageShown);
@@ -1045,7 +1084,14 @@ function applyHL(roots, hl, skip){
   tgt.scrollIntoView({block:'center'});
 }
 function current(){ return decodeURIComponent(location.hash.slice(1)); }
-window.addEventListener('hashchange', () => { show(current()); closeMenu(); });
+window.addEventListener('hashchange', () => {
+  const before = $('#view').firstElementChild;
+  // leaving the search page clears the rail's search box
+  if (lastPageQ && !current().startsWith('search=') && q.value.trim() === lastPageQ.trim()){ q.value = ''; res.hidden = true; $('#hint').hidden = true; }
+  show(current()); closeMenu();
+  const v = $('#view');
+  if (v.firstElementChild !== before){ v.classList.remove('enter'); void v.offsetWidth; v.classList.add('enter'); }
+});
 
 // back pill for cross references
 let backStack = [];
@@ -1058,6 +1104,8 @@ document.addEventListener('click', e => {
     if (current() === id) show(id); else location.hash = id;
     closeMenu(); return;
   }
+  const sk = e.target.closest('[data-skind]');
+  if (sk){ searchKind = sk.dataset.skind; pageShown = 40; const y = Math.min(window.scrollY, 0); $('#view').innerHTML = searchHTML(current().slice(7), pageShown); window.scrollTo(0, y); return; }
   const mo = e.target.closest('.more');
   if (mo){ pageShown = +mo.dataset.more; const y = window.scrollY; $('#view').innerHTML = searchHTML(current().slice(7), pageShown); window.scrollTo(0, y); return; }
   const tf = e.target.closest('.tf');
@@ -1520,10 +1568,17 @@ function railHTML(v){
       + `${sn ? `<span class="snip1">${hlHTML(sn.g.s[sn.i], sn.g.f[sn.i], Q, 150)}</span>` : ''}</a>`;
   }).join('') + `<a class="all" href="#search=${encodeURIComponent(v)}">${list.length > 6 ? `All ${list.length} results` : 'Show results'} in context →</a>`;
 }
+let searchKind = '';
+const KPL = {War: 'Wars', Battle: 'Battles', Person: 'People', Revolt: 'Revolts', Event: 'Events', Institution: 'Institutions', Region: 'Regions', Period: 'Periods'};
 function searchHTML(v, n){
-  const {Q, list} = findQ(v);
-  let h = `<header class="region-head"><div class="eyebrow"><span>Search</span><span>${list.length} ${list.length === 1 ? 'result' : 'results'}</span></div><h1 class="sq">${esc(v)}</h1>${fixHTML(Q, v, true)}</header>`;
-  if (!list.length) return h + '<p class="lede">No matches. Try a surname, place or year, or fewer words.</p>';
+  const found = findQ(v), Q = found.Q, all = found.list;
+  const kc = {}; all.forEach(it => kc[it.kind] = (kc[it.kind] || 0) + 1);
+  if (searchKind && !kc[searchKind]) searchKind = '';
+  const list = searchKind ? all.filter(it => it.kind === searchKind) : all;
+  const kinds = Object.keys(KPL).filter(k => kc[k]);
+  let h = `<header class="region-head"><div class="eyebrow"><span>Search</span><span>${all.length} ${all.length === 1 ? 'result' : 'results'}</span></div><h1 class="sq">${esc(v)}</h1>${fixHTML(Q, v, true)}
+    ${kinds.length > 1 ? `<div class="pchips" role="group" aria-label="Show only">${[['', 'All', all.length], ...kinds.map(k => [k, KPL[k], kc[k]])].map(([k, l, c]) => `<button type="button" class="pchip" data-skind="${k}" aria-pressed="${searchKind === k}">${l} <span class="c">${c}</span></button>`).join('')}</div>` : ''}</header>`;
+  if (!all.length) return h + '<p class="lede">No matches. Try a surname, place or year, or fewer words.</p>';
   h += '<ol class="serp">' + list.slice(0, n).map(it => {
     const allS = snippets(it, Q, 999);
     const sns = allS.length > 3 ? snippets(it, Q, 3) : allS;
@@ -2160,8 +2215,29 @@ window.addEventListener('scroll', () => {
     const max = document.documentElement.scrollHeight - innerHeight, y = scrollY;
     prog.style.transform = `scaleX(${max > 400 ? Math.min(1, y / max) : 0})`;
     totop.classList.toggle('on', y > innerHeight * 1.5);
+    spy();
   });
 }, {passive: true});
+let spyId = '';
+function spy(){
+  if (!currentRegion) return;
+  const arts = document.querySelectorAll('#view article.war:not([hidden])');
+  let cur = null;
+  for (const a of arts){ if (a.getBoundingClientRect().top < innerHeight * 0.35) cur = a; else break; }
+  const id = cur ? cur.id : '';
+  if (id === spyId) return;
+  spyId = id;
+  document.querySelectorAll('.toc a.cur').forEach(a => a.classList.remove('cur'));
+  const link = id && document.querySelector(`.toc a[data-toc="${id}"]`);
+  if (!link) return;
+  link.classList.add('cur');
+  // keep the highlighted line inside the rail's own scroll area (desktop only)
+  const rail = $('#rail');
+  if (matchMedia('(min-width:901px)').matches){
+    const r = link.getBoundingClientRect(), rr = rail.getBoundingClientRect();
+    if (r.top < rr.top + 60 || r.bottom > rr.bottom - 90) rail.scrollTop += r.top - rr.top - rr.height / 3;
+  }
+}
 totop.addEventListener('click', () => window.scrollTo({top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}));
 new MutationObserver(() => document.body.classList.toggle('has-back', !$('#backpill').hidden)).observe($('#backpill'), {attributes: true, attributeFilter: ['hidden']});
 
