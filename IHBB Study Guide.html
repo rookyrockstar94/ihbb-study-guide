@@ -1088,8 +1088,17 @@ function homeHTML(){
 
 // ---------- rail ----------
 let currentRegion = null, sec = 'wars', hub = false;
+// each region page shows artwork for its part of the world; guide home pages keep the guide's own
+const REGION_ART = [[/ancient-world/, 'rome'], [/near-east|egypt/, 'egypt'], [/greece|macedon/, 'greece'], [/(^|-)rome$/, 'rome'],
+  [/steppe/, 'steppe'], [/byzantium|islamic|persia/, 'byz'], [/britain|ireland/, 'britain'], [/france/, 'france'],
+  [/iberia|spain|portugal|italy/, 'spain'], [/germany|central-europe/, 'germany'], [/russia|poland|scandinavia|balkans/, 'russia'],
+  [/pan-european/, 'paneuro'], [/19th-century/, 'c19'], [/^world-war-ii$/, 'ww2'], [/^world-war-i$/, 'ww1'], [/china/, 'china'],
+  [/japan|korea/, 'japan'], [/southeast-asia/, 'seasia'], [/south-asia/, 'southasia'], [/middle-east/, 'mideast'], [/africa/, 'africa'],
+  [/latin-america/, 'latam'], [/united-states/, 'usa'], [/cold-war/, 'coldwar']];
+const regionArt = R => { const r = R && REGION_ART.find(([re]) => re.test(R.id)); return r ? r[1] : ''; };
 function renderRail(){
   document.body.dataset.g = inPractice ? 'prac' : hub ? 'hub' : sec;
+  document.body.dataset.art = !inPractice && !hub ? regionArt(currentRegion) : '';
   $('#brandT').innerHTML = hub ? 'Study Guide' : SECS[sec].name;
   $('#brand').setAttribute('href', '#home');
   [['wars', '#secWars'], ['revs', '#secRevs'], ['people', '#secPeople'], ['evs', '#secEvs'], ['ins', '#secIns']].forEach(([s, el]) => {
